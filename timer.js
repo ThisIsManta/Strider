@@ -1,4 +1,4 @@
-﻿$(document).ready(function () {
+$(document).ready(function () {
 	if ($('#logo-container').children().length > 1) {
 		$('#logo-container').children().wrap('<div></div>');
 		$('#logo-container').children().hide().eq(0).show();
@@ -35,10 +35,10 @@ $(window).on('resize', function () {
 	$('#rank-container').css('font-size', ((1 - widthRatio) * availWidth * 0.0063) + 'em');
 });
 
-console.info('Enter or S = Start/Stop/Reset');
-console.info('Space or L = Capture');
-console.info('         A = Show/Hide timer');
-console.info('       F11 = Go full screen');
+console.info('Enter or Alt+S = Start/Stop/Reset');
+console.info('Space or Alt+Q = Capture');
+console.info('         Alt+T = Show/Hide timer');
+console.info('           F11 = Go full screen');
 
 $(document).on('keyup', function (e) {
 	if (e.keyCode === 13 /* Enter */ || e.altKey && e.keyCode === 83 /* S */) {
@@ -133,11 +133,16 @@ function lap() {
 }
 
 function publish() {
+	var targetSheetId = '1jrcHe6SXm76uJiPtcTv8Gv25nSEVbiEAjhYMTNHLDhs';
+	var targetKeyColumnIndex = 5;
+	var targetValueColumnIndex = 7;
+	var targetNameColumnIndex = 2;
+
 	if ($('#rank-container ol li').length > 0) {
 		$('#lap-button').attr('disabled', true);
 		
 		$.ajax({
-			url: 'https://script.google.com/macros/s/AKfycbwapJlU2tlNLgTQ3ts0qVayv7uybDvZe5R7kox1vhOhF3FOA-I/exec?numbs=' + new Enumerable($('#rank-container ol li .rank')).select(function (current) { return current.textContent.trim() }).toString(',') + '&times=' + new Enumerable($('#rank-container ol li .time')).select(function (current) { return current.textContent.trim() }).toString(','),
+			url: 'https://script.google.com/macros/s/AKfycbwapJlU2tlNLgTQ3ts0qVayv7uybDvZe5R7kox1vhOhF3FOA-I/exec?book=' + encodeURIComponent(targetSheetId) + '&key=' + targetKeyColumnIndex + '&value=' + targetValueColumnIndex + '&name=' + targetNameColumnIndex + '&numbs=' + new Enumerable($('#rank-container ol li .rank')).select(function (current) { return current.textContent.trim() }).toString(',') + '&times=' + new Enumerable($('#rank-container ol li .time')).select(function (current) { return current.textContent.trim() }).toString(','),
 			type: 'GET',
 			complete: function (e) {
 				if (e.responseJSON.result === 'success') {
