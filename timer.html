@@ -8,6 +8,7 @@
     <script src="jquery-ui.min.js" type="text/javascript"></script>
     <link href="jquery-ui.min.css" rel="stylesheet" />
     <script src="moment.min.js" type="text/javascript"></script>
+    <script src="Enumerable-min.js" type="text/javascript"></script>
     <script src="timer.js" type="text/javascript"></script>
     <style>
       @font-face {
@@ -23,6 +24,11 @@
       @font-face {
         font-family: Roboto Thin;
         src: url(Roboto-Thin.ttf);
+      }
+
+      @font-face {
+        font-family: Mahaniyom;
+        src: url(LayijiMahaniyom-Bao-1.2.ttf);
       }
 
       body {
@@ -85,6 +91,7 @@
 
       button:disabled {
         background: gray !important;
+		cursor: default !important;
       }
 
       button#lap-button {
@@ -100,16 +107,23 @@
         padding: 0 5px;
         display: inline-block;
         outline: none;
+		vertical-align: top;
+        margin: 0 5px;
       }
 
       #rank-container .rank {
         background: black;
         color: white;
         text-align: right;
-        margin-right: 10px;
       }
+	  
+	  #rank-container .name {
+		font-family: Mahaniyom;
+		font-weight: bold;
+		min-width: 300px;
+	  }
 
-      #rank-container .time:hover {
+      #rank-container .time:hover, #rank-container .name {
         background: white;
       }
     </style>

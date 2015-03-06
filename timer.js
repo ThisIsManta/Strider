@@ -13,7 +13,11 @@
 	});
 
 	$('#lap-button').on('click', function (e) {
-		lap();
+		if (e.currentTarget.textContent.trim().toUpperCase() === 'PUBLISH') {
+			publish();
+		} else {
+			lap();
+		}
 
 		$(e.currentTarget).blur();
 		e.preventDefault();
@@ -37,13 +41,13 @@ console.info('         A = Show/Hide timer');
 console.info('       F11 = Go full screen');
 
 $(document).on('keyup', function (e) {
-	if (e.keyCode === 13 /* Enter */ || e.keyCode === 83 /* S */) {
+	if (e.keyCode === 13 /* Enter */ || e.altKey && e.keyCode === 83 /* S */) {
 		time();
 
-	} else if (e.keyCode === 32 /* Space */ || e.keyCode === 76 /* L */) {
+	} else if (e.keyCode === 32 /* Space */ || e.altKey && e.keyCode === 76 /* Q */) {
 		lap();
 
-	} else if (e.keyCode === 65 /* A */) {
+	} else if (e.altKey && e.keyCode === 84 /* T */) {
 		$('#time-container, #button-container').toggle({ effect: 'pulsate', times: 3 });
 	}
 });
@@ -55,8 +59,8 @@ function time() {
 	if (isRunning) {
 		isRunning = false;
 		$('#time-container').css('color', 'red');
-		$('#time-button').text('Reset').css('background', 'red');
-		$('#lap-button').attr('disabled', true);
+		$('#time-button').text('Reset').css('background', 'firebrick');
+		$('#lap-button').text('Publish');
 
 	} else if (now !== null) {
 		lastRank = 0;
@@ -65,9 +69,10 @@ function time() {
 		update();
 		$('#time-container').css('color', '');
 		$('#time-button').text('Start').css('background', '');
-		$('#dial-container').width('100%');
+		$('#dial-container').show().width('100%');
 		$('#rank-container').width('0%').find('ol').empty();
-
+		$('#lap-button').text('Capture').attr('disabled', true);
+		
 	} else {
 		now = moment();
 		isRunning = true;
@@ -124,6 +129,41 @@ function lap() {
 		}
 
 		lastRank += 1;
+	}
+}
+
+function publish() {
+	if ($('#rank-container ol li').length > 0) {
+		$('#lap-button').attr('disabled', true);
+		
+		$.ajax({
+			url: 'https://script.google.com/macros/s/AKfycbwapJlU2tlNLgTQ3ts0qVayv7uybDvZe5R7kox1vhOhF3FOA-I/exec?numbs=' + new Enumerable($('#rank-container ol li .rank')).select(function (current) { return current.textContent.trim() }).toString(',') + '&times=' + new Enumerable($('#rank-container ol li .time')).select(function (current) { return current.textContent.trim() }).toString(','),
+			type: 'GET',
+			complete: function (e) {
+				if (e.responseJSON.result === 'success') {
+					console.log('succeed with ' + e.responseJSON.affectedRowNumber + ' row(s)');
+					
+					if (Array.isArray(e.responseJSON.names)) {
+						new Enumerable(e.responseJSON.names).invoke(function (name, index) {
+							$('<div class="name">' + (name || '') + '</div>').insertAfter('#rank-container ol li:eq(' + index + ') .rank');
+						});
+						
+						if ($('#rank-container').width() > 0) {
+							$('#dial-container').hide();
+						}
+					}
+					
+				} else {
+					console.error(e.responseJSON.error);
+				}
+				
+				$('#lap-button').attr('disabled', null);
+			}
+		});
+		console.log('waiting for response...');
+		
+	} else {
+		console.log('nothing is to be published');
 	}
 }
 
