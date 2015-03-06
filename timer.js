@@ -134,8 +134,8 @@ function lap() {
 
 function publish() {
 	var targetSheetId = '1jrcHe6SXm76uJiPtcTv8Gv25nSEVbiEAjhYMTNHLDhs';
-	var targetKeyColumnIndex = 5;
-	var targetValueColumnIndex = 7;
+	var targetKeyColumnIndex = 4;
+	var targetValueColumnIndex = 6;
 	var targetNameColumnIndex = 2;
 
 	if ($('#rank-container ol li').length > 0) {
