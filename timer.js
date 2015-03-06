@@ -1,5 +1,6 @@
 ﻿$(document).ready(function () {
 	if ($('#logo-container').children().length > 1) {
+		$('#logo-container').children().wrap('<div></div>');
 		$('#logo-container').children().hide().eq(0).show();
 		playLogo();
 	}
@@ -24,14 +25,16 @@
 $(window).on('resize', function () {
 	var widthRatio = $('#dial-container').data('width-ratio');
 	var availWidth = $(window).width();
+
+	$('#logo-container img').css('max-width', (widthRatio * availWidth * 0.05) + 'em');
 	$('#time-container').css('font-size', (widthRatio * availWidth * 0.0083) + 'em');
 	$('#rank-container').css('font-size', ((1 - widthRatio) * availWidth * 0.0063) + 'em');
 });
 
-console.log('Enter or S = Start/Stop/Reset');
-console.log('Space or L = Capture');
-console.log('         A = Show/Hide timer');
-console.log('F11        = Go full screen');
+console.info('Enter or S = Start/Stop/Reset');
+console.info('Space or L = Capture');
+console.info('         A = Show/Hide timer');
+console.info('       F11 = Go full screen');
 
 $(document).on('keyup', function (e) {
 	if (e.keyCode === 13 /* Enter */ || e.keyCode === 83 /* S */) {
@@ -41,7 +44,7 @@ $(document).on('keyup', function (e) {
 		lap();
 
 	} else if (e.keyCode === 65 /* A */) {
-		$('#time-container, #button-container').toggle({ effect: 'scale' });
+		$('#time-container, #button-container').toggle({ effect: 'pulsate', times: 3 });
 	}
 });
 
@@ -56,6 +59,7 @@ function time() {
 		$('#lap-button').attr('disabled', true);
 
 	} else if (now !== null) {
+		lastRank = 0;
 		console.log('---')
 		now = null;
 		update();
@@ -90,21 +94,23 @@ function update() {
 	$('#time-container span:last-child').text(f);
 }
 
+var lastRank = 0;
+
 function lap() {
 	if (isRunning) {
 		var $time = $('<div class="time" contenteditable></div>').append($('#time-container').children().clone());
 		console.log($time.text());
-		var rank = ($('#rank-container ol li').length + 1).toLeadingString('0', 3);
+		var rank = (lastRank + 1).toLeadingString('0', 3);
 		var $rank = $('<li></li>').append('<div class="rank" contenteditable spellcheck="false">' + (rank < 10 ? ' ' : '') + '<span class="light">#</span><span>' + rank + '</span></div>').append($time);
 
-		if ($('#rank-container ol li').length === 0) {
+		if (lastRank === 0) {
 			var widthRatio = $('#dial-container').data('width-ratio');
 			$('#dial-container').width(widthRatio * 100 + '%');
 			$('#rank-container').width((1 - widthRatio) * 100 + '%').css('zoom', 1);
 			$(window).trigger('resize');
 
 			setTimeout(function () {
-				$('#rank-container ol').append($rank.hide());
+				$('#rank-container ol').prepend($rank.hide());
 				$rank.show({ effect: 'blind', direction: 'up' });
 			}, 1000);
 
@@ -116,6 +122,8 @@ function lap() {
 			$('#rank-container ol').append($rank.hide());
 			$rank.show({ effect: 'blind', direction: 'up' });
 		}
+
+		lastRank += 1;
 	}
 }
 
