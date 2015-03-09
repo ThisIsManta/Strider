@@ -1,0 +1,90 @@
+@font-face {
+	font-family: Roboto;
+	src: url(Roboto-Regular.ttf);
+}
+
+@font-face {
+	font-family: Roboto Light;
+	src: url(Roboto-Light.ttf);
+}
+
+@font-face {
+	font-family: Roboto Thin;
+	src: url(Roboto-Thin.ttf);
+}
+
+@font-face {
+	font-family: Mahaniyom;
+	src: url(LayijiMahaniyom-Bao-1.2.ttf);
+}
+
+.light {
+	font-family: Roboto Light;
+}
+
+.thin {
+	font-family: Roboto Thin;
+}
+
+.bold {
+	font-family: Roboto Black;
+}
+
+.thai {
+	font-family: Mahaniyom;
+	font-weight: bold;
+}
+
+button {
+	-webkit-appearance: none;
+	background: royalblue;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	box-shadow: 0px 2px 4px 1px rgba(0,0,0,0.2);
+	margin: 5px 10px;
+	padding: 5px 20px;
+	min-width: 150px;
+	font-family: inherit;
+	font-size: 1.5em;
+	text-transform: uppercase;
+	outline: none;
+	cursor: pointer;
+}
+
+button:disabled {
+	background: gray !important;
+	cursor: default !important;
+}
+
+body {
+	background: #ffcd03;
+	font-family: Roboto;
+	margin: 0;
+}
+
+div.table-like {
+	display: table;
+}
+
+div.table-like > div {
+	display: table-row;
+}
+
+div.table-like > div > div {
+	display: table-cell;
+}
+
+ul, ol {
+	list-style: none;
+	-webkit-margin-before: 0;
+	-webkit-margin-after: 0;
+	-webkit-padding-start: 0;
+}
+
+.preserve-aspect-ratio > img, img.preserve-aspect-ratio {
+	display: inline-block;
+	max-height: 200px;
+	width: auto;
+	height: auto;
+}

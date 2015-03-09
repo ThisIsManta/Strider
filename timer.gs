@@ -1,4 +1,4 @@
-/*
+﻿/*
 How to use this Google Script
 1. Go to your Google Drive
 2. Click New > More > Connect more apps
@@ -21,11 +21,6 @@ How to use this Google Script
 18. Select "Anyone, even anonymous" under "Who has access to the app" section
 19. Click Deploy
 20. Click OK
-21. Go to https://chrome.google.com/webstore
-22. Search for extension "Allow-Control-Allow-Origin" and install it
-23. Enable cross-origin resource sharing in the previously installed extension
-
-Now, you can publish the results.
 
 If you want to modify this script, you will need to repeat step 13 to 20 over again.
 */
@@ -64,10 +59,10 @@ function doGet(e) {
 			}
 		}
 
-		return ContentService.createTextOutput(JSON.stringify({ result: "success", affectedRowNumber: affectedRowNumber, names: names })).setMimeType(ContentService.MimeType.JSON);
+		return ContentService.createTextOutput('afterPublish(' + JSON.stringify({ status: "success", affectedRowNumber: affectedRowNumber, names: names }) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
 
 	} catch (e) {
-		return ContentService.createTextOutput(JSON.stringify({ result: "error", error: e })).setMimeType(ContentService.MimeType.JSON);
+		return ContentService.createTextOutput('afterPublish(' + JSON.stringify({ status: "error", error: e }) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
 
 	} finally {
 		lock.releaseLock();

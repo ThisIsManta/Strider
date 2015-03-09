@@ -1,3 +1,5 @@
+﻿console.info('version 1.2');
+
 $(document).ready(function () {
 	if ($('#logo-container').children().length > 1) {
 		$('#logo-container').children().wrap('<div></div>');
@@ -22,23 +24,27 @@ $(document).ready(function () {
 		$(e.currentTarget).blur();
 		e.preventDefault();
 	});
-
+	
 	$(window).trigger('resize');
 });
 
 $(window).on('resize', function () {
 	var widthRatio = $('#dial-container').data('width-ratio');
 	var availWidth = $(window).width();
+	var availHeight = $(window).height();
 
-	$('#logo-container img').css('max-width', (widthRatio * availWidth * 0.05) + 'em');
+	$('#logo-container img').css('max-width', (widthRatio * availWidth * 0.05) + 'em').css('max-height', Math.round(Math.min(availWidth, availHeight) * 0.311) + 'px');
+	$('#logo-container').css('height', $('#logo-container img').css('max-height'));
 	$('#time-container').css('font-size', (widthRatio * availWidth * 0.0083) + 'em');
 	$('#rank-container').css('font-size', ((1 - widthRatio) * availWidth * 0.0063) + 'em');
 });
 
-console.info('Enter or Alt+S = Start/Stop/Reset');
-console.info('Space or Alt+Q = Capture');
-console.info('         Alt+T = Show/Hide timer');
-console.info('           F11 = Go full screen');
+console.info('type "help()" and press enter to see the list of useful functions');
+
+// console.info('Enter or Alt+S = Start/Stop/Reset');
+// console.info('Space or Alt+Q = Capture');
+// console.info('         Alt+T = Show/Hide timer');
+// console.info('           F11 = Go full screen');
 
 $(document).on('keyup', function (e) {
 	if (e.keyCode === 13 /* Enter */ || e.altKey && e.keyCode === 83 /* S */) {
@@ -60,7 +66,7 @@ function time() {
 		isRunning = false;
 		$('#time-container').css('color', 'red');
 		$('#time-button').text('Reset').css('background', 'firebrick');
-		$('#lap-button').text('Publish');
+		$('#lap-button').text('Publish').attr('disabled', lastRank > 0 ? null : true);
 
 	} else if (now !== null) {
 		lastRank = 0;
@@ -103,7 +109,7 @@ var lastRank = 0;
 
 function lap() {
 	if (isRunning) {
-		var $time = $('<div class="time" contenteditable></div>').append($('#time-container').children().clone());
+		var $time = $('<div class="time"></div>').append($('#time-container').children().clone());
 		console.log($time.text());
 		var rank = (lastRank + 1).toLeadingString('0', 3);
 		var $rank = $('<li></li>').append('<div class="rank" contenteditable spellcheck="false">' + (rank < 10 ? ' ' : '') + '<span class="light">#</span><span>' + rank + '</span></div>').append($time);
@@ -133,43 +139,47 @@ function lap() {
 }
 
 function publish() {
-	var targetSheetId = '1jrcHe6SXm76uJiPtcTv8Gv25nSEVbiEAjhYMTNHLDhs';
-	var targetKeyColumnIndex = 5;
-	var targetValueColumnIndex = 7;
-	var targetNameColumnIndex = 2;
+	var targetSheetId = '1IuETigIVdGN9GVWaVuhg_Z1LSiUEucXPbuuB6PsI8Ow'; // Google Spreadsheet ID; It is XXX in the URL https://docs.google.com/spreadsheets/d/XXX/edit
+	var targetKeyColumnIndex = 4; // The one-based column index (column A is 1, B is 2 and so on) that contains running code
+	var targetValueColumnIndex = 5; // The one-based column index (column A is 1, B is 2 and so on) that is to be replaced by time code (HH:mm:ss.SSS)
+	var targetNameColumnIndex = 2; // The one-based column index (column A is 1, B is 2 and so on) that contains competitor name
 
-	if ($('#rank-container ol li').length > 0) {
+	if (lastRank > 0) {
 		$('#lap-button').attr('disabled', true);
 		
 		$.ajax({
-			url: 'https://script.google.com/macros/s/AKfycbwapJlU2tlNLgTQ3ts0qVayv7uybDvZe5R7kox1vhOhF3FOA-I/exec?book=' + encodeURIComponent(targetSheetId) + '&key=' + targetKeyColumnIndex + '&value=' + targetValueColumnIndex + '&name=' + targetNameColumnIndex + '&numbs=' + new Enumerable($('#rank-container ol li .rank')).select(function (current) { return current.textContent.trim() }).toString(',') + '&times=' + new Enumerable($('#rank-container ol li .time')).select(function (current) { return current.textContent.trim() }).toString(','),
+			url: 'https://script.google.com/macros/s/AKfycbwapJlU2tlNLgTQ3ts0qVayv7uybDvZe5R7kox1vhOhF3FOA-I/exec?book=' + encodeURIComponent(targetSheetId) + '&key=' + targetKeyColumnIndex + '&value=' + targetValueColumnIndex + '&name=' + targetNameColumnIndex + '&numbs=' + encodeURIComponent(new Enumerable($('#rank-container ol li .rank')).select(function (current) { return current.textContent.trim() }).toString(',')) + '&times=' + encodeURIComponent(new Enumerable($('#rank-container ol li .time')).select(function (current) { return current.textContent.trim() }).toString(',')),
 			type: 'GET',
-			complete: function (e) {
-				if (e.responseJSON.result === 'success') {
-					console.log('succeed with ' + e.responseJSON.affectedRowNumber + ' row(s)');
-					
-					if (Array.isArray(e.responseJSON.names)) {
-						new Enumerable(e.responseJSON.names).invoke(function (name, index) {
-							$('<div class="name">' + (name || '') + '</div>').insertAfter('#rank-container ol li:eq(' + index + ') .rank');
-						});
-						
-						if ($('#rank-container').width() > 0) {
-							$('#dial-container').hide();
-						}
-					}
-					
-				} else {
-					console.error(e.responseJSON.error);
-				}
-				
-				$('#lap-button').attr('disabled', null);
-			}
+			dataType: 'jsonp',
+			contentType: 'application/javascript',
+			crossDomain: true
 		});
-		console.log('waiting for response...');
+		console.log('waiting for the publishing result...');
 		
 	} else {
-		console.log('nothing is to be published');
+		console.log('nothing will be published');
 	}
+}
+
+function afterPublish(data) {
+	if (data.status === 'success') {
+		console.log('published with ' + data.affectedRowNumber + ' affected row(s)');
+		
+		if (Array.isArray(data.names)) {
+			new Enumerable(data.names).invoke(function (name, index) {
+				$('<div class="name thai">' + (name || '') + '</div>').insertAfter('#rank-container ol li:eq(' + index + ') .rank');
+			});
+			
+			if ($('#rank-container').width() > 0) {
+				$('#dial-container').hide();
+			}
+		}
+		
+	} else {
+		console.error(data.error);
+	}
+	
+	$('#lap-button').attr('disabled', null);
 }
 
 function shrink(rank) {
@@ -192,11 +202,9 @@ Number.prototype.toLeadingString = function (char, length) {
 	return temp;
 }
 
-var isPlayingLogo = false;
+var isPlayingLogo = true;
 
 function playLogo() {
-	isPlayingLogo = !isPlayingLogo;
-	
 	setTimeout(function () {
 		if (isPlayingLogo) {
 			var $container = $('#logo-container');
